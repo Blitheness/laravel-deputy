@@ -1,14 +1,17 @@
 {
     "name": "blitheness/laravel-deputy",
     "description": "Laravel package for interacting with the Deputy API",
+    "keywords": [
+        "blitheness",
+        "deputy"
+    ],
     "homepage": "https://github.com/Blitheness/laravel-deputy",
     "support": {
         "issues": "https://github.com/Blitheness/laravel-deputy/issues",
         "source": "https://github.com/Blitheness/laravel-deputy"
     },
     "require": {
-        "php": "^7.0",
-        "curl/curl": "^1.9",
+        "php": ">=7.0",
         "illuminate/support": "^5.6"
     },
     "require-dev": {
@@ -35,7 +38,8 @@
     "authors": [
         {
             "name": "Blitheness",
-            "email": "blitheness@oneiric.co.uk"
+            "email": "blitheness@oneiric.co.uk",
+            "role": "Developer"
         }
     ],
     "minimum-stability": "stable"
