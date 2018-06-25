@@ -17,12 +17,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Blitheness\\Deputy\\": "src"
+            "Blitheness\\Deputy\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Blitheness\\Deputy\\Test\\": "tests"
+            "Blitheness\\Deputy\\Test\\": "tests/"
         }
     },
     "extra": {
