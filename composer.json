@@ -1,6 +1,7 @@
 {
     "name": "blitheness/laravel-deputy",
     "description": "Laravel package for interacting with the Deputy API",
+    "type": "library",
     "keywords": [
         "blitheness",
         "deputy"
@@ -11,8 +12,8 @@
         "source": "https://github.com/Blitheness/laravel-deputy"
     },
     "require": {
-        "php": ">=7.0",
-        "illuminate/support": "^5.6"
+        "laravel/framework": "^5.5.45",
+        "illuminate/support": "^5.5"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.2"
