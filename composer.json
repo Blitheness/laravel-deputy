@@ -1,0 +1,38 @@
+{
+    "name": "blitheness/laravel-deputy",
+    "description": "Laravel package for interacting with the Deputy API",
+    "type": "library",
+    "require": {
+        "php": "^7.0",
+        "curl/curl": "^1.9",
+        "illuminate/support": "^5.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Blitheness\\Deputy\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Blitheness\\Deputy\\Test\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Blitheness\\Deputy\\DeputyServiceProvider"
+            ]
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Blitheness",
+            "email": "blitheness@oneiric.co.uk"
+        }
+    ],
+    "minimum-stability": "stable"
+}
