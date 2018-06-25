@@ -1,7 +1,6 @@
 {
     "name": "blitheness/laravel-deputy",
     "description": "Laravel package for interacting with the Deputy API",
-    "type": "library",
     "homepage": "https://github.com/Blitheness/laravel-deputy",
     "support": {
         "issues": "https://github.com/Blitheness/laravel-deputy/issues",
