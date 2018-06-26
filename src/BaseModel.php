@@ -53,7 +53,7 @@ class BaseModel {
             'dp-meta-option: none'
         ];
 
-        $payload = !is_empty($this->payload) ? json_encode($this->payload) : null;
+        $payload = !empty($this->payload) ? json_encode($this->payload) : null;
 
         $piTrCurlHandle = curl_init();
         curl_setopt($piTrCurlHandle, CURLOPT_HTTPGET, 1);
