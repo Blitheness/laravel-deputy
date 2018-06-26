@@ -4,6 +4,7 @@ namespace Blitheness\Deputy;
 
 class BaseModel {
     protected $objectName;
+    protected $path;
     protected $method = "POST";
     protected $isResource = true;
     protected $required = [];
@@ -27,11 +28,12 @@ class BaseModel {
      */
     public function find(int $id) {
         $this->method = "GET";
-        $path = $this->objectName . '/' . $id;
-        return $this->resource($path);
+        $this->path = $this->objectName . '/' . $id;
+        return $this->resource();
     }
 
     public function search($field, $operator, $value) {
+        $this->path = $this->objectName . '/QUERY';
         $searchCount = count($this->payload['search']) ?? 0;
         $this->payload['search']['f' . ($searchCount+1)] = [
             'field' => $field,
@@ -41,8 +43,8 @@ class BaseModel {
         return $this;
     }
 
-    protected function resource($path) {
-        $url = 'https://' . config('deputy.url') . '/api/v1/' . ($this->isResource?'resource/':'') . $path;
+    protected function resource() {
+        $url = 'https://' . config('deputy.url') . '/api/v1/' . ($this->isResource?'resource/':'') . $this->path;
 
         $httpHeader = [
             'Content-type: application/json',
