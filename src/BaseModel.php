@@ -13,6 +13,7 @@ class BaseModel {
     protected $strings = [];
     protected $booleans = [];
     protected $modified = [];
+    protected $payload = [];
 
     /**
      * Saves the current model
@@ -30,7 +31,17 @@ class BaseModel {
         return $this->resource($path);
     }
 
-    protected function resource($path, $payload = null) {
+    public function search($field, $operator, $value) {
+        $searchCount = count($this->payload['search']) ?? 0;
+        $this->payload['search']['f' . ($searchCount+1)] = [
+            'field' => $field,
+            'type' => $operator,
+            'data' => $value
+        ];
+        return $this;
+    }
+
+    protected function resource($path) {
         $url = 'https://' . config('deputy.url') . '/api/v1/' . ($this->isResource?'resource/':'') . $path;
 
         $httpHeader = [
@@ -40,7 +51,7 @@ class BaseModel {
             'dp-meta-option: none'
         ];
 
-        $payload = $payload ? json_encode($payload) : null;
+        $payload = !is_empty($this->payload) ? json_encode($this->payload) : null;
 
         $piTrCurlHandle = curl_init();
         curl_setopt($piTrCurlHandle, CURLOPT_HTTPGET, 1);
