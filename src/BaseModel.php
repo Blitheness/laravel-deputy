@@ -5,6 +5,7 @@ namespace Blitheness\Deputy;
 class BaseModel {
     protected $objectName;
     protected $method = "POST";
+    protected $isResource = true;
     protected $required = [];
     protected $integers = [];
     protected $dates = [];
@@ -30,7 +31,7 @@ class BaseModel {
     }
 
     protected function resource($path, $payload = null) {
-        $url = 'https://' . config('deputy.url') . '/api/v1/resource/' . $path;
+        $url = 'https://' . config('deputy.url') . '/api/v1/' . ($this->isResource?'resource/':'') . $path;
 
         $httpHeader = [
             'Content-type: application/json',
