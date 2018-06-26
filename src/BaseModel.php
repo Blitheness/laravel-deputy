@@ -30,12 +30,12 @@ class BaseModel {
     }
 
     protected function resource($path, $payload = null) {
-        $url = 'https://' . env('DEPUTY_URL') . '/api/v1/resource/' . $path;
+        $url = 'https://' . config('deputy.url') . '/api/v1/resource/' . $path;
 
         $httpHeader = [
             'Content-type: application/json',
             'Accept: application/json',
-            'Authorization: OAuth ' . env('DEPUTY_TOKEN'),
+            'Authorization: OAuth ' . config('deputy.token'),
             'dp-meta-option: none'
         ];
 

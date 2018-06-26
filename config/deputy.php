@@ -1,4 +1,5 @@
 <?php
 return [
-    'deputy' => 'hi'
+    'url'   => env('DEPUTY_URL'),
+    'token' => env('DEPUTY_TOKEN')
 ];
