@@ -29,7 +29,7 @@ class BaseModel {
     public function find(int $id) {
         $this->method = "GET";
         $this->path = $this->objectName . '/' . $id;
-        return $this->resource();
+        return $this->get();
     }
 
     public function search($field, $operator, $value) {
@@ -50,7 +50,7 @@ class BaseModel {
         return $this;
     }
 
-    protected function resource() {
+    public function get() {
         $url = 'https://' . config('deputy.url') . '/api/v1/' . ($this->isResource?'resource/':'') . $this->path;
 
         $httpHeader = [
