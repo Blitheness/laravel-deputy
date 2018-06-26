@@ -23,7 +23,7 @@ class BaseModel {
     /**
      * Finds a model with the specified ID
      */
-    public function find((int) $id) {
+    public function find(int $id) {
         $this->method = "GET";
         $path = $this->objectName . '/' . $id;
         return $this->resource($path);
