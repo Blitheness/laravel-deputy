@@ -34,12 +34,19 @@ class BaseModel {
 
     public function search($field, $operator, $value) {
         $this->path = $this->objectName . '/QUERY';
+
+        if(!isset($this->payload['search'])) {
+            $this->payload['search'] = [];
+        }
+
         $searchCount = count($this->payload['search']) ?? 0;
+
         $this->payload['search']['f' . ($searchCount+1)] = [
             'field' => $field,
             'type' => $operator,
             'data' => $value
         ];
+
         return $this;
     }
 
