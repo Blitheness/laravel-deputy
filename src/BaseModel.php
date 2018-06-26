@@ -2,7 +2,7 @@
 
 namespace Blitheness\Deputy;
 
-public class BaseModel {
+class BaseModel {
     protected $objectName;
     protected $method = "POST";
     protected $required = [];
