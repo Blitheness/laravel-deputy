@@ -2,25 +2,116 @@
 
 namespace Blitheness\Deputy;
 
+use Illuminate\Container\EntryNotFoundException;
+
 class BaseModel {
     protected $objectName;
     protected $path;
-    protected $method = "POST";
+    protected $method     = "POST";
     protected $isResource = true;
-    protected $required = [];
-    protected $integers = [];
-    protected $dates = [];
+    protected $readOnly   = false;
+    protected $hasData    = false;
+    protected $currentId  = null;
+    protected $attributes = [];
+    protected $values     = [];
+    protected $required   = [];
+    protected $integers   = [];
+    protected $dates      = [];
     protected $timestamps = [];
-    protected $strings = [];
-    protected $booleans = [];
-    protected $modified = [];
-    protected $payload = [];
+    protected $strings    = [];
+    protected $booleans   = [];
+    protected $modifiedAttributes = [];
+    protected $payload    = [];
 
     /**
      * Saves the current model
      */
     public function save() {
-        
+        if(!$this->isModified()) {
+            return false;
+        }
+        foreach($this->modifiedAttributes as $a) {
+            $this->payload[$a] = $this->values[$a];
+        }
+        $this->method = "POST";
+        $this->get();
+        return true;
+    }
+
+    /**
+     * Intercept gets
+     */
+    public function __get($name) {
+        if(!in_array($name, $this->attributes)) {
+            throw new EntryNotFoundException("The attribute {$name} is unavailable on this data model");
+        }
+        return $this->values[$name];
+    }
+
+    /**
+     * Intercept sets
+     */
+    public function __set($name, $value) {
+        if($this->readOnly) {
+            throw new \Exception("Cannot write to this data model because it is read-only");
+        }
+        if(!in_array($name, $this->attributes)) {
+            throw new EntryNotFoundException("The attribute {$name} is unavailable on this data model");
+        }
+        if($this->validate($name, $value)) {
+            $this->values[$name] = $value;
+            $this->setModified($name);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the value for an attribute is acceptable
+     */
+    public function validate($name, $value) {
+        if(in_array($name, $this->strings)) {
+            if(is_string($value)) {
+                return true;
+            }
+        } else if(in_array($name, $this->booleans)) {
+            if(is_bool($value)) {
+                return true;
+            }
+        } else if(in_array($name, $this->integers)) {
+            if(is_numeric($value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Mark the given attribute as modified
+     *
+     * Returns 'true' when marked as modified
+     * Returns 'false' if already marked as modified
+     */
+    public function setModified($name) {
+        if(!in_array($name, $this->modifiedAttributes)) {
+            $this->modifiedAttributes[] = $name;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Whether or not this model has been 'filled' with data from the API
+     */
+    public function hasData() {
+        return $this->hasData;
+    }
+
+    /**
+     * Whether or not this model has been changed locally since last downloaded from the API
+     */
+    public function isModified() {
+        return count($this->modifiedAttributes) > 0;
     }
 
     /**
@@ -29,6 +120,7 @@ class BaseModel {
     public function find(int $id) {
         $this->method = "GET";
         $this->path = $this->objectName . '/' . $id;
+        $this->currentId = $id;
         return $this->get();
     }
 
@@ -46,6 +138,8 @@ class BaseModel {
             'type' => $operator,
             'data' => $value
         ];
+
+        $this->method = "POST";
 
         return $this;
     }
@@ -79,6 +173,11 @@ class BaseModel {
 
         curl_setopt($piTrCurlHandle, CURLOPT_HTTPHEADER, $httpHeader);
 
-        return json_decode(curl_exec($piTrCurlHandle), true);
+        $data = json_decode(curl_exec($piTrCurlHandle), true);
+        $this->values = $data;
+        if(count($data)>0) {
+            $this->hasData = true;
+        }
+        return $this;
     }
 }

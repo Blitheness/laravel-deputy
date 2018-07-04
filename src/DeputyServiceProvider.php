@@ -3,6 +3,7 @@
 namespace Blitheness\Deputy;
 
 use Illuminate\Support\ServiceProvider;
+use Blitheness\Deputy\Facades\Deputy;
 
 class DeputyServiceProvider extends ServiceProvider {
     /**
@@ -29,6 +30,8 @@ class DeputyServiceProvider extends ServiceProvider {
      * @return void
      */
     public function register() {
-        
+        $this->app->singleton('deputy', function() {
+            return Deputy::getInstance();
+        });
     }
 }

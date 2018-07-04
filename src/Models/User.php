@@ -7,34 +7,17 @@ use Blitheness\Deputy\BaseModel;
 class User extends BaseModel {
     protected $objectName = "userinfo";
     protected $isResource = false;
+    protected $readOnly   = true;
 
     /**
-     * ID of the user
-     *
-     * @var integer
+     * Array of attribute names that exist for this resource
      */
-    protected $id;
-
-    /**
-     * Display name for this Employee object
-     *
-     * @var string
-     */
-    protected $displayName;
-
-    /**
-     * URL to this user's photo
-     *
-     * @var string
-     */
-    protected $photo;
-
-    /**
-     * User's employee ID
-     *
-     * @var integer
-     */
-    protected $employeeId;
+    protected $attributes = [
+        'Id',
+        'DisplayName',
+        'Photo',
+        'Employee'
+    ];
 
     /**
      * Fields that must have an integer value
