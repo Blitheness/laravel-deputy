@@ -6,7 +6,7 @@ This package is provided AS-IS, with no guarantee of functionality or support. T
 Some basic instructions are provided below.
 
 ## Installation
-`composer install blitheness/laravel-deputy`
+`composer require blitheness/laravel-deputy dev-master`
 
 `php artisan vendor:publish` _(then enter number for Blitheness\Deputy\DeputyServiceProvider)_
 
