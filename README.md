@@ -13,7 +13,7 @@ Some basic instructions are provided below.
 ## Configuration
 Either update **config/deputy.php** to change the 'url' and 'token' values, or set 'DEPUTY_URL' and 'DEPUTY_TOKEN' values in your .env file.
 
-The URL is the Deputy subdomain that your company is using, such as "mycompany.eu.deputy.com", without any "http://", "http://", or any trailing slashes.
+The URL is the Deputy subdomain that your company is using, such as "mycompany.eu.deputy.com", without any "http://", "https://", or any trailing slashes.
 
 The token is your Deputy API 'Permanent Token', which may be created by a System Administrator in your organisation. An authorised user may generate a token by following the instructions in the Deputy API documentation: https://www.deputy.com/api-doc/API/Authentication
 
@@ -48,6 +48,7 @@ More than one condition may be used per query by chaining the search calls toget
 `$results = Resource::search('FieldName', 'eq', 'Value')->search('Active', 'eq', '1')->get();`
 
 ### Updating Resources
+#### Model attributes
 To update a resource, it must not be a read-only resource.
 
 First, retrieve the resource you wish to modify, for example:
@@ -61,3 +62,21 @@ Secondly, change the desired attribute(s) on the model:
 Finally, call the save method on the model:
 
 `$resource->save()`
+
+#### Background tasks (Jobs)
+##### Remove employee from location
+To disassociate an employee from a location, you must know the employee's ID and the ID of the location.
+
+Then, one of the following jobs may be dispatched:
+
+`Blitheness\Deputy\Jobs\DisassociateEmployee`
+
+Firstly, include this in the controller file before your class declaration:
+
+`use Blitheness\Deputy\Jobs\DisassociateEmployee;`
+
+Then, write the following where you would like to dispatch the job:
+
+`DisassociateEmployee::dispatch($deputyId, $locationId);`
+
+where deputyId is the Employee ID, and locationId is the ID of the location that they are to be removed from.

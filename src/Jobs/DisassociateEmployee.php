@@ -23,7 +23,6 @@ class DisassociateEmployee implements ShouldQueue
      * @return void
      */
     public function __construct(int $employee, int $location) {
-        \Log::info('Constructing disassociation job');
         $this->employee = $employee;
         $this->location = $location;
     }
