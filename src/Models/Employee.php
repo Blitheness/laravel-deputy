@@ -111,4 +111,34 @@ class Employee extends BaseModel {
         'HigherDuty', // nullable
         'AllowAppraisal'
     ];
+
+    public function addToLocation(int $location) {
+        $this->payload = [];
+        $this->method = 'POST';
+        $this->isResource = false;
+        $this->path = 'supervise/employee/' . $this->Id . '/assoc/' . $location;
+        $output = $this->get();
+        $this->isResource = true;
+        return $output;
+    }
+
+    public function removeFromLocation(int $location) {
+        $this->payload = [];
+        $this->method = 'POST';
+        $this->isResource = false;
+        $this->path = 'supervise/employee/' . $this->Id . '/unassoc/' . $location;
+        $output = $this->get();
+        $this->isResource = true;
+        return $output;
+    }
+
+    public function terminate() {
+        $this->payload = [];
+        $this->method = 'POST';
+        $this->isResource = false;
+        $this->path = 'supervise/employee/' . $this->Id . '/terminate';
+        $output = $this->get();
+        $this->isResource = true;
+        return $output;
+    }
 }
