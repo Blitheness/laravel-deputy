@@ -2,7 +2,7 @@
     "name": "blitheness/laravel-deputy",
     "description": "Laravel package for interacting with the Deputy API",
     "type": "library",
-    "version": "0.1.3",
+    "version": "0.2.0",
     "keywords": [
         "blitheness",
         "deputy"
