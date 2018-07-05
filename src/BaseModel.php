@@ -3,6 +3,8 @@
 namespace Blitheness\Deputy;
 
 use Illuminate\Container\EntryNotFoundException;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class BaseModel {
     protected $objectName;
@@ -22,6 +24,25 @@ class BaseModel {
     protected $booleans   = [];
     protected $modifiedAttributes = [];
     protected $payload    = [];
+    protected $errors     = [];
+
+    /**
+     * Initialise
+     */
+    public function __construct(array $data = null) {
+        if($data != null) {
+            foreach($data as $k=>$v) {
+                if(in_array($k, $this->attributes)) {
+                    if($this->validate($k, $v)) {
+                        $this->values[$k] = $v;
+                        if($k == 'Id') {
+                            $this->currentId = $v;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Saves the current model
@@ -117,11 +138,16 @@ class BaseModel {
     /**
      * Finds a model with the specified ID
      */
-    public function find(int $id) {
+    public function find(int $id = null) {
         $this->method = "GET";
-        $this->path = $this->objectName . '/' . $id;
-        $this->currentId = $id;
-        return $this->get();
+        if(null == $id) {
+            $this->path = $this->objectName;
+        } else {
+            $this->path = $this->objectName . '/' . $id;
+            $this->currentId = $id;
+        }
+        $output = $this->get();
+        return $output;
     }
 
     public function search($field, $operator, $value) {
@@ -146,7 +172,6 @@ class BaseModel {
 
     public function get() {
         $url = 'https://' . config('deputy.url') . '/api/v1/' . ($this->isResource?'resource/':'') . $this->path;
-
         $httpHeader = [
             'Content-type: application/json',
             'Accept: application/json',
@@ -166,18 +191,34 @@ class BaseModel {
         curl_setopt($piTrCurlHandle, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($piTrCurlHandle, CURLOPT_TIMEOUT, 500);
 
-        if($payload) {
+        if($this->method == "POST") {
             curl_setopt($piTrCurlHandle, CURLOPT_POST, 1);
+        }
+        if($payload) {
             curl_setopt($piTrCurlHandle, CURLOPT_POSTFIELDS, $payload);
         }
 
         curl_setopt($piTrCurlHandle, CURLOPT_HTTPHEADER, $httpHeader);
 
         $data = json_decode(curl_exec($piTrCurlHandle), true);
-        $this->values = $data;
-        if(count($data)>0) {
+        if(array_key_exists('error', $data)) {
+            $this->errors[] = $data['error'];
+            \Log::error('Deputy API error ' . $data['error']['code'] . ' for path ' . $this->path . ': ' . $data['error']['message']);
+            return false;
+        } else if(count($data) == 0) {
+            return $this;
+        } else if(count($data) == count($data, COUNT_RECURSIVE)) {
+            $this->values = $data;
             $this->hasData = true;
+            return $this;
+        } else {
+            $collection = new Collection();
+            $type = 'Blitheness\\Deputy\\Models\\' . $this->objectName;
+            foreach($data as $k=>$v) {
+                $model = new $type($v);
+                $collection->push($model);
+            }
+            return $collection;
         }
-        return $this;
     }
 }
