@@ -200,7 +200,7 @@ class BaseModel {
     }
 
     private function apiCall($path, $payload) {
-        $url = https://' . config('deputy.url') . '/api/v1/' . $path;
+        $url = 'https://' . config('deputy.url') . '/api/v1/' . $path;
         $httpHeader = [
             'Content-type: application/json',
             'Accept: application/json',
