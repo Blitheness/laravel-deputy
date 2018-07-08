@@ -2,7 +2,6 @@
 
 namespace Blitheness\Deputy;
 
-use Illuminate\Container\EntryNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -48,13 +47,23 @@ class BaseModel {
      * TODO allow resource creation as well as updates, by checking if Id is set
      */
     public function save() {
+        // If this object hasn't had its values changed, then abort.
         if(!$this->isModified()) {
             return false;
         }
+
+        // Discard cached objects
+        Cache::forget($this->getCacheKey());
+
         foreach($this->modifiedAttributes as $a) {
             $this->payload[$a] = $this->values[$a];
         }
+
+        // Set request method to POST
         $this->method = "POST";
+
+        // Run the request
+        // TODO This should return the modified object - use it
         $this->get();
         return true;
     }
@@ -64,7 +73,7 @@ class BaseModel {
      */
     public function __get($name) {
         if(!in_array($name, $this->attributes)) {
-            throw new EntryNotFoundException("The attribute {$name} is unavailable on this data model");
+            throw new \Exception("The attribute {$name} is unavailable on this data model");
         }
         return $this->values[$name];
     }
@@ -77,7 +86,7 @@ class BaseModel {
             throw new \Exception("Cannot write to this data model because it is read-only");
         }
         if(!in_array($name, $this->attributes)) {
-            throw new EntryNotFoundException("The attribute {$name} is unavailable on this data model");
+            throw new \Exception("The attribute {$name} is unavailable on this data model");
         }
         if($this->validate($name, $value)) {
             $this->values[$name] = $value;
@@ -170,10 +179,27 @@ class BaseModel {
         return $this;
     }
 
-    public function get() {
-        $path = ($this->isResource?'resource/':'') . $this->path;
+    public function getPath() {
+        return ($this->isResource?'resource/':'') . $this->path;
+    }
 
-        $data = $this->apiCall($path, $this->payload);
+    public function getCacheKey() {
+        return 'dp_' . $this->getPath();
+    }
+
+    public function get() {
+        $path = $this->getPath();
+        $cacheKey = $this->getCacheKey();
+
+        // Cache GET request result for a while if cache mode is on (in config/deputy.php)
+        if($this->method == "GET" && Cache::has($cacheKey)) {
+            $data = Cache::get($cacheKey);
+        } else {
+            $data = $this->apiCall($path, $this->method, $this->payload);
+            if($this->method == "GET") {
+                Cache::put($cacheKey, $data, now()->addMinutes(10));
+            }
+        }
 
         \Log::info("[Deputy] Made a request to " . $path);
         \Log::info("Result: " . json_encode($data));
@@ -199,7 +225,7 @@ class BaseModel {
         }
     }
 
-    private function apiCall($path, $payload) {
+    private function apiCall($path, $method, $payload) {
         $url = 'https://' . config('deputy.url') . '/api/v1/' . $path;
         $httpHeader = [
             'Content-type: application/json',
@@ -216,7 +242,7 @@ class BaseModel {
         curl_setopt($piTrCurlHandle, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($piTrCurlHandle, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($piTrCurlHandle, CURLOPT_TIMEOUT,        500);
-        if($this->method == "POST") {
+        if($method == "POST") {
             curl_setopt($piTrCurlHandle, CURLOPT_POST,    1);
             curl_setopt($piTrCurlHandle, CURLOPT_HTTPGET, 0);
         } else {
