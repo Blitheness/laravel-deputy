@@ -32,12 +32,10 @@ class BaseModel {
     public function __construct(array $data = null) {
         if($data != null) {
             foreach($data as $k=>$v) {
-                if(in_array($k, $this->attributes)) {
-                    if($this->validate($k, $v)) {
-                        $this->values[$k] = $v;
-                        if($k == 'Id') {
-                            $this->currentId = $v;
-                        }
+                if(in_array($k, $this->attributes) && $this->validate($k, $v)) {
+                    $this->values[$k] = $v;
+                    if($k == 'Id') {
+                        $this->currentId = $v;
                     }
                 }
             }
@@ -46,6 +44,8 @@ class BaseModel {
 
     /**
      * Saves the current model
+     *
+     * TODO allow resource creation as well as updates, by checking if Id is set
      */
     public function save() {
         if(!$this->isModified()) {
@@ -171,36 +171,13 @@ class BaseModel {
     }
 
     public function get() {
-        $url = 'https://' . config('deputy.url') . '/api/v1/' . ($this->isResource?'resource/':'') . $this->path;
-        $httpHeader = [
-            'Content-type: application/json',
-            'Accept: application/json',
-            'Authorization: OAuth ' . config('deputy.token'),
-            'dp-meta-option: none'
-        ];
+        $path = ($this->isResource?'resource/':'') . $this->path;
 
-        $payload = !empty($this->payload) ? json_encode($this->payload) : null;
+        $data = $this->apiCall($path, $this->payload);
 
-        $piTrCurlHandle = curl_init();
-        curl_setopt($piTrCurlHandle, CURLOPT_HTTPGET, 1);
-        curl_setopt($piTrCurlHandle, CURLOPT_RESUME_FROM, 0);
-        curl_setopt($piTrCurlHandle, CURLOPT_URL, $url);
-        curl_setopt($piTrCurlHandle, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($piTrCurlHandle, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($piTrCurlHandle, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($piTrCurlHandle, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($piTrCurlHandle, CURLOPT_TIMEOUT, 500);
+        \Log::info("[Deputy] Made a request to " . $path);
+        \Log::info("Result: " . json_encode($data));
 
-        if($this->method == "POST") {
-            curl_setopt($piTrCurlHandle, CURLOPT_POST, 1);
-        }
-        if($payload) {
-            curl_setopt($piTrCurlHandle, CURLOPT_POSTFIELDS, $payload);
-        }
-
-        curl_setopt($piTrCurlHandle, CURLOPT_HTTPHEADER, $httpHeader);
-
-        $data = json_decode(curl_exec($piTrCurlHandle), true);
         if(array_key_exists('error', $data)) {
             $this->errors[] = $data['error'];
             \Log::error('Deputy API error ' . $data['error']['code'] . ' for path ' . $this->path . ': ' . $data['error']['message']);
@@ -220,5 +197,36 @@ class BaseModel {
             }
             return $collection;
         }
+    }
+
+    private function apiCall($path, $payload) {
+        $url = https://' . config('deputy.url') . '/api/v1/' . $path;
+        $httpHeader = [
+            'Content-type: application/json',
+            'Accept: application/json',
+            'Authorization: OAuth ' . config('deputy.token'),
+            'dp-meta-option: none'
+        ];
+        $payload = !empty($payload) ? json_encode($payload) : null;
+        $piTrCurlHandle = curl_init();
+        curl_setopt($piTrCurlHandle, CURLOPT_RESUME_FROM,    0);
+        curl_setopt($piTrCurlHandle, CURLOPT_URL,            $url);
+        curl_setopt($piTrCurlHandle, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($piTrCurlHandle, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($piTrCurlHandle, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($piTrCurlHandle, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($piTrCurlHandle, CURLOPT_TIMEOUT,        500);
+        if($this->method == "POST") {
+            curl_setopt($piTrCurlHandle, CURLOPT_POST,    1);
+            curl_setopt($piTrCurlHandle, CURLOPT_HTTPGET, 0);
+        } else {
+            curl_setopt($piTrCurlHandle, CURLOPT_POST,    0);
+            curl_setopt($piTrCurlHandle, CURLOPT_HTTPGET, 1);
+        }
+        if($payload) {
+            curl_setopt($piTrCurlHandle, CURLOPT_POSTFIELDS, $payload);
+        }
+        curl_setopt($piTrCurlHandle, CURLOPT_HTTPHEADER, $httpHeader);
+        return json_decode(curl_exec($piTrCurlHandle), true);
     }
 }
