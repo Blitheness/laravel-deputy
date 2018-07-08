@@ -141,4 +141,11 @@ class Employee extends BaseModel {
         $this->isResource = true;
         return $output;
     }
+
+    public function mapCompanyName($id = null) {
+        if(null == $id) {
+            $id = $this->Company;
+        }
+        return config('deputy.companies.' . $id, $id);
+    }
 }

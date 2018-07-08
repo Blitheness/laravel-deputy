@@ -197,13 +197,12 @@ class BaseModel {
             $data = Cache::get($cacheKey);
         } else {
             $data = $this->apiCall($path, $this->method, $this->payload);
+            \Log::info("[Deputy] Made a {$this->method} request to {$path}.");
             if($this->method == "GET") {
                 \Log::info("[Deputy] Adding item to cache for 10 minutes: " . $cacheKey);
                 Cache::put($cacheKey, $data, now()->addMinutes(10));
             }
         }
-
-        \Log::info("[Deputy] Made a {$this->method} request to {$path}.");
 
         if(array_key_exists('error', $data)) {
             $this->errors[] = $data['error'];
