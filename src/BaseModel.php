@@ -205,8 +205,6 @@ class BaseModel {
             \Log::error('[Deputy] API error ' . $data['error']['code'] . ' for path ' . $this->getPath() . ': ' . $data['error']['message']);
             \Log::error('[Deputy] * method: ' . $this->method);
             return false;
-        } else if(count($data) == 0) {
-            return $this;
         } else if(count($data) == count($data, COUNT_RECURSIVE)) {
             if($this->method == "GET" && $this->isResource) {
                 \Log::info("[Deputy] Adding item to cache for 10 minutes: " . $cacheKey);
@@ -215,7 +213,7 @@ class BaseModel {
             $this->values = $data;
             $this->hasData = true;
             return $this;
-        } else {
+        } else if(is_array($data) {
             $collection = new Collection();
             $type = 'Blitheness\\Deputy\\Models\\' . $this->objectName;
             foreach($data as $k=>$v) {
@@ -223,6 +221,9 @@ class BaseModel {
                 $collection->push($model);
             }
             return $collection;
+        } else {
+            $this->errors[] = "No conditions matched in BaseModel::get()";
+            return $this;
         }
     }
 
