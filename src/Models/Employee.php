@@ -113,6 +113,7 @@ class Employee extends BaseModel {
     ];
 
     public function addToLocation(int $location) {
+        $this->invalidateCache();
         $this->payload = [];
         $this->method = 'POST';
         $this->isResource = false;
@@ -123,6 +124,7 @@ class Employee extends BaseModel {
     }
 
     public function removeFromLocation(int $location) {
+        $this->invalidateCache();
         $this->payload = [];
         $this->method = 'POST';
         $this->isResource = false;
@@ -133,6 +135,7 @@ class Employee extends BaseModel {
     }
 
     public function terminate() {
+        $this->invalidateCache();
         $this->payload = [];
         $this->method = 'POST';
         $this->isResource = false;

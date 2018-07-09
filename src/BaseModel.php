@@ -71,7 +71,7 @@ class BaseModel {
         }
 
         // Discard cached objects
-        Cache::forget($this->getCacheKey());
+        $this->invalidateCache();
 
         foreach($this->modifiedAttributes as $a) {
             $this->payload[$a] = $this->values[$a];
@@ -84,6 +84,10 @@ class BaseModel {
         // TODO This should return the modified object - use it
         $this->get();
         return true;
+    }
+
+    public function invalidateCache() {
+        return Cache::forget($this->getCacheKey());
     }
 
     /**
@@ -208,13 +212,17 @@ class BaseModel {
     public function get() {
         $path = $this->getPath();
         $cacheKey = $this->getCacheKey();
+        $fromCache = false;
+        $this->errors = [];
 
         // Cache GET request result for a while if cache mode is on (in config/deputy.php)
-        if($this->method == "GET" && Cache::has($cacheKey)) {
+        if($this->method == "GET" && $this->isResource && Cache::has($cacheKey)) {
             \Log::info("[Deputy] Retrieving item from cache: " . $cacheKey);
             $data = Cache::get($cacheKey);
+            $fromCache = true;
         } else {
             $data = $this->apiCall($path, $this->method, $this->payload);
+            $this->payload = [];
             \Log::info("[Deputy] Made a {$this->method} request to {$path}.");
         }
 
@@ -222,9 +230,9 @@ class BaseModel {
             $this->errors[] = $data['error'];
             \Log::error('[Deputy] API error ' . $data['error']['code'] . ' for path ' . $this->getPath() . ': ' . $data['error']['message']);
             \Log::error('[Deputy] * method: ' . $this->method);
-            return false;
+            return $this;
         } else if(is_array($data) && count($data) == count($data, COUNT_RECURSIVE)) {
-            if($this->method == "GET" && $this->isResource) {
+            if(!$fromCache && $this->method == "GET" && $this->isResource) {
                 \Log::info("[Deputy] Adding item to cache for 10 minutes: " . $cacheKey);
                 Cache::put($cacheKey, $data, now()->addMinutes(10));
             }
@@ -274,5 +282,13 @@ class BaseModel {
         }
         curl_setopt($piTrCurlHandle, CURLOPT_HTTPHEADER, $httpHeader);
         return json_decode(curl_exec($piTrCurlHandle), true);
+    }
+
+    public function hasError() {
+        return count($this->errors) >= 1;
+    }
+
+    public function getErrors() {
+        return $this->errors;
     }
 }
