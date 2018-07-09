@@ -53,8 +53,8 @@ class DisassociateEmployee implements ShouldQueue
             if(config('deputy.terminate_if_only_in_default', false)) {
                 if(config('deputy.default_company', 0) != 0 && $workplaces->count() == 2) {
                     foreach($workplaces as $w) {
-                        if($w->Id == $this->location) continue;
-                        if($w->Id == config('deputy.default_company')) {
+                        if($w->Company == $this->location) continue;
+                        if($w->Company == config('deputy.default_company')) {
                             \Log::info('[Deputy] Only remaining workplace of ' . $employee->DisplayName . ' was the default workplace, so the employee has been terminated.');
                             $employee->terminate();
                         }
