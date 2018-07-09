@@ -6,23 +6,41 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class BaseModel {
+    // Resource name
     protected $objectName;
+    // Path to Deputy API resource
     protected $path;
+    // Request method
     protected $method     = "POST";
+    // Whether or not to pre-pend 'resource/' to object name in path
     protected $isResource = true;
+    // Can the model be updated?
     protected $readOnly   = false;
+    // Has this model been populated with data from the API?
     protected $hasData    = false;
+    // Current resource Id that is being worked with
     protected $currentId  = null;
+    // Attributes that may be manipulated on this model
     protected $attributes = [];
+    // Values retrieved from API or set in constructor
     protected $values     = [];
+    // Attributes that must be set to create or update this model
     protected $required   = [];
+    // Attributes that must be integers
     protected $integers   = [];
+    // Attributes that must be dates
     protected $dates      = [];
+    // Attributes that must be timestamps
     protected $timestamps = [];
+    // Attributes that must be strings
     protected $strings    = [];
+    // Attributes that must be booleans
     protected $booleans   = [];
+    // Attributes that have been modified since last save/find
     protected $modifiedAttributes = [];
+    // Data to send in a POST request to update a model or perform a search
     protected $payload    = [];
+    // Any errors received from the API
     protected $errors     = [];
 
     /**
@@ -213,7 +231,7 @@ class BaseModel {
             $this->values = $data;
             $this->hasData = true;
             return $this;
-        } else if(is_array($data) {
+        } else if(is_array($data)) {
             $collection = new Collection();
             $type = 'Blitheness\\Deputy\\Models\\' . $this->objectName;
             foreach($data as $k=>$v) {
