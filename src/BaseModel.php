@@ -223,7 +223,7 @@ class BaseModel {
             \Log::error('[Deputy] API error ' . $data['error']['code'] . ' for path ' . $this->getPath() . ': ' . $data['error']['message']);
             \Log::error('[Deputy] * method: ' . $this->method);
             return false;
-        } else if(count($data) == count($data, COUNT_RECURSIVE)) {
+        } else if(is_array($data) && count($data) == count($data, COUNT_RECURSIVE)) {
             if($this->method == "GET" && $this->isResource) {
                 \Log::info("[Deputy] Adding item to cache for 10 minutes: " . $cacheKey);
                 Cache::put($cacheKey, $data, now()->addMinutes(10));
