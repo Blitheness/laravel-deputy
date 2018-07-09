@@ -204,7 +204,7 @@ class BaseModel {
             }
         }
 
-        if(array_key_exists('error', $data)) {
+        if(is_array($data) && array_key_exists('error', $data)) {
             $this->errors[] = $data['error'];
             \Log::error('Deputy API error ' . $data['error']['code'] . ' for path ' . $this->path . ': ' . $data['error']['message']);
             return false;
