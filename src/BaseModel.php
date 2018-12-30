@@ -226,7 +226,7 @@ class BaseModel {
             \Log::info("[Deputy] Made a {$this->method} request to {$path}.");
         }
 
-        // TODO re-write and document this section so it makes sense
+        // TODO stop relying on wishy thinking; re-write and document this section so it makes sense
         if(is_array($data) && array_key_exists('error', $data)) {
             $this->errors[] = $data['error'];
             \Log::error('[Deputy] API error ' . $data['error']['code'] . ' for path ' . $this->getPath() . ': ' . $data['error']['message']);
@@ -241,13 +241,17 @@ class BaseModel {
             $this->hasData = true;
             return $this;
         } else if(is_array($data)) {
-            if(array_key_exists('Id', $data)) return $this;
+            if(array_key_exists('Id', $data)) {
+                $this->hasData = true;
+                return $this;
+            }
             $collection = new Collection();
             $type = 'Blitheness\\Deputy\\Models\\' . $this->objectName;
             foreach($data as $k=>$v) {
                 $model = new $type($v);
                 $collection->push($model);
             }
+            $this->hasData = true;
             return $collection;
         } else {
             $this->errors[] = "No conditions matched in BaseModel::get()";
