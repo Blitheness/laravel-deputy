@@ -249,9 +249,9 @@ class BaseModel {
             $type = 'Blitheness\\Deputy\\Models\\' . $this->objectName;
             foreach($data as $k=>$v) {
                 $model = new $type($v);
+                $model->hasData = true;
                 $collection->push($model);
             }
-            $this->hasData = true;
             return $collection;
         } else {
             $this->errors[] = "No conditions matched in BaseModel::get()";
