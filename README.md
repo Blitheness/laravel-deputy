@@ -1,3 +1,5 @@
+This project has been archived, and no further support will be provided. Anyone is welcome to fork the project to continue development.
+
 # laravel-deputy
 Laravel package for interacting with the Deputy API. Deputy is a powerful business management system, available from https://www.deputy.com.
 
